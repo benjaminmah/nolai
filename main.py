@@ -5,9 +5,9 @@ import random
 # Constants
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
-RECTANGLE_COLOR = (245, 8, 175, 1)
-HIGHLIGHT_COLOR = (245, 175, 224, 1)
-BAR_COLOR = (245, 8, 175, 1)
+RECTANGLE_COLOR = (245, 8, 175)
+HIGHLIGHT_COLOR = (245, 175, 224)
+BAR_COLOR = (245, 8, 175)
 RECTANGLE_WIDTH = 80
 RECTANGLE_HEIGHT = 40
 RECTANGLE_GAP = 20
@@ -15,23 +15,66 @@ RECTANGLE_Y = SCREEN_HEIGHT - RECTANGLE_HEIGHT - 50
 PRESSED_OFFSET = 5  # Offset to simulate the button being pressed
 SPEED = 500  # Adjust this value as needed
 
-# SONG
-songs = {"allergy": ["assets/allergy.mp3", "assets/gidle.jpg", "assets/allergy.txt", {'A': 50000, 'B': 35000, 'C': 20000, 'D': 10000, 'F': 0}],
-         "ima": ["assets/ima.mp3", "assets/ima.jpg", "assets/ima.txt", {'A': 120000, 'B': 90000, 'C': 50000, 'D': 10000, 'F': 0}],
-         "afterlike": ["assets/afterlike.mp3", "assets/afterlike.jpg", "assets/afterlike.txt", {'A': 120000, 'B': 90000, 'C': 50000, 'D': 10000, 'F': 0}]
-         }
+# SONGS dictionary with paths and grade thresholds
+songs = {
+    "allergy": ["assets/allergy2.mp3", "assets/gidle.jpg", "assets/allergy.txt", {'A': 50000, 'B': 35000, 'C': 20000, 'D': 10000, 'F': 0}],
+    "ima": ["assets/ima.mp3", "assets/ima.jpg", "assets/ima.txt", {'A': 120000, 'B': 90000, 'C': 50000, 'D': 10000, 'F': 0}],
+    "afterlike": ["assets/afterlike.mp3", "assets/afterlike.jpg", "assets/afterlike.txt", {'A': 120000, 'B': 90000, 'C': 50000, 'D': 10000, 'F': 0}]
+}
 
-song = "allergy"
+# Initialize Pygame
+pygame.init()
+pygame.mixer.init()
+screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+pygame.display.set_caption("Rhythm Game")
+clock = pygame.time.Clock()
+font = pygame.font.Font(None, 36)  # Default font for simplicity
 
-track = songs[song][0]
-image = songs[song][1]
-song_notes = songs[song][2]
-grade_threshold = songs[song][3]
+def song_select_screen():
+    running = True
+    song_keys = list(songs.keys())
+    selected_index = 0
+    while running:
+        screen.fill((0, 0, 0))  # Fill screen with black
+        for i, key in enumerate(song_keys):
+            if i == selected_index:
+                text_surf = font.render(f"> {key}", True, HIGHLIGHT_COLOR)  # Highlight selected song
+            else:
+                text_surf = font.render(key, True, (255, 255, 255))  # Other songs
+            screen.blit(text_surf, (100, 100 + i * 40))
+
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    selected_index = max(0, selected_index - 1)
+                elif event.key == pygame.K_DOWN:
+                    selected_index = min(len(song_keys) - 1, selected_index + 1)
+                elif event.key == pygame.K_RETURN:
+                    return song_keys[selected_index]
 
 class Game:
-    def __init__(self):
-        pygame.init()
-        pygame.mixer.init()
+    def __init__(self, song_choice):
+        self.song_choice = song_choice
+        self.track, self.image, self.song_notes, self.grade_threshold = songs[song_choice]
+        self.load_assets()
+        self.reset_game()
+        self.main_loop()
+
+    def load_assets(self):
+        self.background_image = pygame.image.load(self.image).convert()
+        self.background_image = pygame.transform.scale(self.background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+        pygame.mixer.music.load(self.track)
+        pygame.mixer.music.set_volume(1.0)
+        with open(self.song_notes, 'r') as f:
+            self.note_timings = [float(line.strip()) for line in f.readlines()]
+        self.grade_thresholds = self.grade_threshold
+
+    def reset_game(self):
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption("Rhythm Game")
         self.clock = pygame.time.Clock()
@@ -41,27 +84,14 @@ class Game:
         self.streak_counter = 0
         self.longest_streak = 0
         self.hit_status = ""
-        self.hit_status_time = None  # Time when the last hit status was updated
+        self.hit_status_time = None
         self.perfect_hits = 0
         self.good_hits = 0
         self.okay_hits = 0
         self.misses = 0
         self.game_over = False
-        self.grade_thresholds = grade_threshold
-
-        self.load_assets()
+        pygame.mixer.music.play(0) 
         self.generate_notes()
-        self.main_loop()
-
-
-    def load_assets(self):
-        self.background_image = pygame.image.load(image).convert()
-        self.background_image = pygame.transform.scale(self.background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
-        pygame.mixer.music.load(track)
-        pygame.mixer.music.set_volume(1.0)
-        pygame.mixer.music.play()
-        with open(song_notes, 'r') as f:
-            self.note_timings = [float(line.strip()) for line in f.readlines()]
 
     def generate_notes(self):
         start_x = (SCREEN_WIDTH - (4 * RECTANGLE_WIDTH + (4 - 1) * RECTANGLE_GAP)) // 2
@@ -141,8 +171,8 @@ class Game:
 
     def draw_stat_box(self, stats):
         custom_font_path = 'commando.ttf'  # Update this path to your font's actual path
-        box_x, box_y, box_width, box_height = 100, 150, 300, 200  # Adjust as needed
-        pygame.draw.rect(self.screen, (255, 255, 255), (box_x, box_y, box_width, box_height), 2)  # Draw the stats box
+        box_x, box_y, box_width, box_height = 100, 150, 300, 190  # Adjust as needed
+        pygame.draw.rect(self.screen, (255, 255, 255), (box_x, box_y, box_width, box_height), 2, border_radius=10)  # Draw the stats box
 
         font = pygame.font.Font(custom_font_path, 24)
         line_height = 30
@@ -199,7 +229,9 @@ class Game:
         # Restart prompt
         font = pygame.font.Font(custom_font_path, 36)
         restart_text = font.render("Press R to Restart", True, (255, 255, 255))
+        menu_text = font.render("Press M to return to Song Select Menu", True, (255, 255, 255))
         self.screen.blit(restart_text, (50, SCREEN_HEIGHT - 50))
+        self.screen.blit(menu_text, (50, SCREEN_HEIGHT - 100))
 
 
     def restart_game(self):
@@ -268,10 +300,16 @@ class Game:
                 elif event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_r and self.game_over:
                         self.restart_game()
-                        self.game_over = False
+                    elif event.key == pygame.K_m and self.game_over:
+                        # Transition back to song selection screen
+                        pygame.mixer.music.stop()  # Stop any playing music
+                        selected_song = song_select_screen()  # Show song selection screen
+                        self.__init__(selected_song)  # Reinitialize the game with new song choice
+                        return  # Exit the current game loop to start over with the new song
 
             if not pygame.mixer.music.get_busy() and not self.game_over:
                 self.game_over = True
+
 
             if not self.game_over:
                 self.screen.blit(self.background_image, (0, 0))
@@ -343,4 +381,5 @@ def calculate_overlap_area(rect1, rect2):
     return 0
 
 if __name__ == "__main__":
-    Game()
+    selected_song = song_select_screen()
+    game = Game(selected_song)
