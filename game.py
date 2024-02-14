@@ -40,6 +40,9 @@ class Game:
         self.font = font
         font2 = pygame.font.Font(self.lyric_font, 18)  # Use the same font size as in display_lyrics
         self.processed_lyrics = preprocess_lyrics(font2, 160, self.lyrics)
+        self.animation_played = False
+        self.result_effects = False
+        self.letter_sound = pygame.mixer.Sound('assets/letter_sound.mp3')
         self.load_assets()
         self.reset_game()
         self.main_loop()
@@ -69,6 +72,8 @@ class Game:
         self.okay_hits = 0
         self.misses = 0
         self.game_over = False
+        self.animation_played = False
+        self.result_effects = False
         pygame.mixer.music.play(0) 
         self.generate_notes()
 
@@ -110,7 +115,7 @@ class Game:
             self.good_hits += 1
         else:
             self.hit_status = "okay!"
-            self.score += min(10 + (self.streak_counter * 10) // 2, 300)
+            self.score += min(10 + (self.streak_counter * 10) // 2, 360)
             self.okay_hits += 1
 
         self.streak_counter += 1
@@ -180,7 +185,7 @@ class Game:
     def calculate_grade(self):
         # Sort the grades based on their thresholds, from highest to lowest
         sorted_grades = sorted(self.grade_thresholds.items(), key=lambda x: x[1], reverse=True)
-        return_grade = "F"  # Default grade
+        return_grade = "f"  # Default grade
         
         for grade, threshold in sorted_grades:
             if self.score >= threshold:
@@ -191,21 +196,69 @@ class Game:
 
     
 
-    def draw_gradient_grade(self, grade, x, y):
+    def draw_gradient_grade(self, grade, x, y, result_effects):
+
+
         font = pygame.font.Font(CUSTOM_FONT, 300)  # Large font size for the grade
         grade_surface = font.render(grade, True, (181, 142, 216))  # Use the light purple color for simplicity
         self.screen.blit(grade_surface, (x, y))
 
+        if not result_effects:
+            pygame.mixer.Sound.play(self.letter_sound)
+            pygame.display.flip()
+        else:
+            pygame.display.flip()
+
+    def animate_stats(self, final_stats):
+        initial_stats = {key: 0 for key in final_stats.keys()}  # Initialize all stats at 0
+        increment_speed = 2  # Time between updates in milliseconds, adjust for desired speed
+        stats_keys = list(final_stats.keys())  # Get a list of the stat keys to manage order
+        current_stat_index = 0  # Start with the first stat
+
+        while current_stat_index < len(stats_keys):
+            stat_key = stats_keys[current_stat_index]
+            if stat_key == "score":
+                initial_stats[stat_key] = final_stats[stat_key]
+            else:
+                while initial_stats[stat_key] < final_stats[stat_key]:
+                    initial_stats[stat_key] += 1  # Increment by 1 for other stats
+
+                    self.screen.fill((0, 0, 0))  # Clear the screen for redrawing
+                    self.draw_stat_box(initial_stats)  # Draw the box with updated stats
+
+                    # Re-draw any other UI elements here
+                    
+                    pygame.display.flip()  # Update the display with the new drawings
+
+                    pygame.time.delay(increment_speed)
+
+                    # Process Pygame events to keep the window responsive
+                    for event in pygame.event.get():
+                        if event.type == pygame.QUIT:
+                            pygame.quit()
+                            return
+
+            current_stat_index += 1  # Move to the next stat once the current is complete
     
+    def draw_stat_box(self, stats):
+        box_x, box_y, box_width, box_height = 100, 150, 300, 190  # Adjust as needed
+        pygame.draw.rect(self.screen, (255, 255, 255), (box_x, box_y, box_width, box_height), 2, border_radius=10)  # Draw the stats box
+
+        font = pygame.font.Font(CUSTOM_FONT, 24)
+        line_height = 30
+        for i, (label, value) in enumerate(stats.items()):
+            # Stat name (left-justified)
+            label_surface = font.render(f"{label}:", True, (255, 255, 255))
+            self.screen.blit(label_surface, (box_x + 10, box_y + 10 + i * line_height))
+            
+            # Stat value (right-justified)
+            value_surface = font.render(f"{value}", True, (255, 255, 255))
+            self.screen.blit(value_surface, (box_x + box_width - value_surface.get_width() - 10, box_y + 10 + i * line_height))
+
     def display_results_screen(self):
-        self.screen.fill((0, 0, 0))  # Clear the screen
-
-        # Display letter grade with gradient (conceptual, not direct code)
-        grade = self.calculate_grade()  # Assume this method calculates and returns the grade based on score
-        self.draw_gradient_grade(grade.upper(), SCREEN_WIDTH - 300, 150)  # Position for the grade, adjust as needed
-
-        # Prepare stats for the left box
-        stats = {
+    
+        # Prepare final stats for the left box
+        final_stats = {
             "score": self.score,
             "max streak": self.longest_streak,
             "perfects": self.perfect_hits,
@@ -213,12 +266,36 @@ class Game:
             "okays": self.okay_hits,
             "misses": self.misses
         }
-        self.draw_stat_box(stats)
+        # Animate stats from 0 to their final values
+        if not self.animation_played:
+            self.animate_stats(final_stats)
+            self.animation_played = True
+        else:
+            self.draw_stat_box(final_stats)
+
+        # Display letter grade with gradient (conceptual, not direct code)
+        grade = self.calculate_grade()  # Assume this method calculates and returns the grade based on score
+        if not self.result_effects:
+            self.draw_gradient_grade(grade, SCREEN_WIDTH - 300, 150, False)  # Position for the grade, adjust as needed
+
+            pygame.time.delay(1000)
+            # Restart prompt
+            font = pygame.font.Font(CUSTOM_FONT, 30)
+            restart_text = font.render("press r to restart", True, (255, 255, 255))
+            menu_text = font.render("press m to return to song select", True, (255, 255, 255))
+            self.screen.blit(restart_text, (50, SCREEN_HEIGHT - 50))
+            self.screen.blit(menu_text, (50, SCREEN_HEIGHT - 100))
+
+            pygame.display.flip()
+            
+            self.result_effects = True
+
+        self.draw_gradient_grade(grade, SCREEN_WIDTH - 300, 150, True)  # Position for the grade, adjust as needed
 
         # Restart prompt
         font = pygame.font.Font(CUSTOM_FONT, 30)
-        restart_text = font.render("press R to restart", True, (255, 255, 255))
-        menu_text = font.render("press M to return to song select", True, (255, 255, 255))
+        restart_text = font.render("press r to restart", True, (255, 255, 255))
+        menu_text = font.render("press m to return to song select", True, (255, 255, 255))
         self.screen.blit(restart_text, (50, SCREEN_HEIGHT - 50))
         self.screen.blit(menu_text, (50, SCREEN_HEIGHT - 100))
 
@@ -233,6 +310,8 @@ class Game:
         self.good_hits = 0
         self.okay_hits = 0
         self.misses = 0
+        self.animation_played = False
+        self.result_effects = False
         # Reset the start time to now
         self.start_time = time.time()
         
@@ -300,7 +379,7 @@ class Game:
         # Draw markers for each grade on top of the bar
         for grade, threshold in self.grade_thresholds.items():
             marker_position = (threshold / max_score) * progress_bar_length + progress_bar_x
-            if grade not in ["a", "f"]:
+            if grade not in ["s", "f"]:
                 pygame.draw.line(self.screen, marker_color, (marker_position, progress_bar_y), (marker_position, progress_bar_y + progress_bar_height), 1)
             
             # Display the grade letter above the marker
@@ -376,6 +455,15 @@ class Game:
                         self.screen.blit(surface, (20, y_position))
                         y_offset += surface.get_height()  # Adjust y_offset for the next line
                     break  # Exit the loop after displaying the current lyric
+    
+    def fade_to_black(self, fade_speed=10):
+        fade_surface = pygame.Surface((self.screen.get_width(), self.screen.get_height()))
+        fade_surface.fill((0, 0, 0))
+        for alpha in range(0, 256, fade_speed):  # Increment by fade_speed
+            fade_surface.set_alpha(alpha)
+            self.screen.blit(fade_surface, (0, 0))
+            pygame.display.flip()
+            pygame.time.delay(50)  # Adjust the delay for the desired speed of the fade effect
 
                 
     def main_loop(self):
@@ -395,6 +483,7 @@ class Game:
                         return  # Exit the current game loop to start over with the new song
 
             if not pygame.mixer.music.get_busy() and not self.game_over:
+                self.fade_to_black()
                 self.game_over = True
 
 
@@ -412,6 +501,7 @@ class Game:
                 self.draw_progress_bar()  # Update and render the progress bar
                 self.display_lyrics()
             else:
+                # self.screen.fill((0, 0, 0))  # Clear the screen
                 self.display_results_screen()
 
             pygame.display.flip()

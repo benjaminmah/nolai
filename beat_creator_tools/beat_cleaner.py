@@ -24,11 +24,11 @@ def remove_close_notes_from_file(input_file_path, output_file_path, threshold):
             file.write(f"{note}\n")
 
 # Define the path to your input file and the desired output file
-input_file_path = 'assets/allergy.txt'  # Update this path
-output_file_path = 'assets/allergy.txt'  # Update this path if you want to write to a new file, or use input_file_path to overwrite
+input_file_path = 'assets/girlscapitalism.txt'  # Update this path
+output_file_path = 'assets/girlscapitalism.txt'  # Update this path if you want to write to a new file, or use input_file_path to overwrite
 
 # Define the threshold for considering notes "really close together"
-threshold = 0.1  # Adjust as needed
+threshold = 0.2  # Adjust as needed
 
 # Call the function
 remove_close_notes_from_file(input_file_path, output_file_path, threshold)

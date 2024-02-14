@@ -13,7 +13,7 @@ PRESSED_OFFSET = 5  # Offset to simulate the button being pressed
 SPEED = 700  # Adjust this value as needed
 CUSTOM_FONT = "assets/outerlimits.ttf"
 JAPANESE_FONT = "assets/noto.ttf"
-KOREAN_FONT = "assets/notokorean.otf"
+KOREAN_FONT = "assets/notokorean.ttf"
 
 # lyrics
 ima_lyrics = [
@@ -70,8 +70,9 @@ allergy_lyrics = [
 
 # SONGS dictionary with paths and grade thresholds
 songs = {
-    "allergy": ["assets/allergy.mp3", "assets/gidle.jpg", "assets/allergy.txt", {'a': 100000, 'b': 75000, 'c': 50000, 'd': 30000, 'f': 0}, allergy_lyrics, KOREAN_FONT],
-    "ima": ["assets/ima.mp3", "assets/ima.jpg", "assets/ima.txt", {'a': 120000, 'b': 90000, 'c': 50000, 'd': 10000, 'f': 0}, ima_lyrics, JAPANESE_FONT],
-    "afterlike": ["assets/afterlike.mp3", "assets/afterlike.jpg", "assets/afterlike.txt", {'a': 120000, 'b': 90000, 'c': 50000, 'd': 10000, 'f': 0}, ima_lyrics, KOREAN_FONT]
-}
+    "allergy": ["assets/allergy.mp3", "assets/gidle.jpg", "assets/allergy.txt", {'s': 130000, 'a': 120000, 'b': 100000, 'c': 80000, 'd': 55000, 'f': 0}, allergy_lyrics, KOREAN_FONT],
+    "ima": ["assets/ima.mp3", "assets/ima.jpg", "assets/ima.txt", {'s': 140000, 'a': 120000, 'b': 90000, 'c': 50000, 'd': 10000, 'f': 0}, ima_lyrics, JAPANESE_FONT],
+    "afterlike": ["assets/afterlike.mp3", "assets/afterlike.jpg", "assets/afterlike.txt", {'s': 140000, 'a': 120000, 'b': 90000, 'c': 50000, 'd': 10000, 'f': 0}, ima_lyrics, KOREAN_FONT],
+    "girlscapitalism": ["assets/girlscapitalism.mp3", "assets/girlscapitalism.png", "assets/girlscapitalism2.txt", {'s': 140000, 'a': 120000, 'b': 90000, 'c': 50000, 'd': 10000, 'f': 0}, [(0, "")], KOREAN_FONT]
+    }
 
