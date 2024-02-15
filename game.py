@@ -79,9 +79,34 @@ class Game:
 
     def generate_notes(self):
         start_x = (SCREEN_WIDTH - (4 * RECTANGLE_WIDTH + (4 - 1) * RECTANGLE_GAP)) // 2
+        last_note_timing = [-float('inf')] * 4  # Assume large negative values as initial last note timings
+        threshold = 0.1  # Define your threshold here
+        
         for timing in self.note_timings:
-            x = start_x + random.randrange(0, 4) * (RECTANGLE_WIDTH + RECTANGLE_GAP)
-            self.notes.append(Note(x, timing))
+            attempted_lanes = set()
+            while len(attempted_lanes) < 4:
+                lane = random.randrange(0, 4)
+                if lane in attempted_lanes:
+                    continue  # This lane was already attempted, try another one
+                attempted_lanes.add(lane)
+                
+                # Check if the timing difference with the last note in this lane is above the threshold
+                if timing - last_note_timing[lane] >= threshold:
+                    x = start_x + lane * (RECTANGLE_WIDTH + RECTANGLE_GAP)
+                    self.notes.append(Note(x, timing))
+                    last_note_timing[lane] = timing  # Update the last note timing for this lane
+                    break  # Exit the while loop after successfully placing the note
+                
+                if len(attempted_lanes) == 4:
+                    # Special handling if no suitable lane is found
+                    # For example, place the note in a random lane or skip the note
+                    # This block will execute if all lanes were attempted but none were suitable
+                    # Example: force placing in the first lane not checked in this iteration
+                    forced_lane = (set(range(4)) - attempted_lanes).pop()  # This should not be empty given the logic
+                    x = start_x + forced_lane * (RECTANGLE_WIDTH + RECTANGLE_GAP)
+                    self.notes.append(Note(x, timing))
+                    last_note_timing[forced_lane] = timing  # Update timing for the forced lane
+                    break  # Exit the while loop
 
     def draw_rectangles(self):
         rhythm_pattern = ['f', 'g', 'h', 'j']
