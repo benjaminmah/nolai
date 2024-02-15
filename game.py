@@ -2,20 +2,54 @@ import pygame
 import time
 import random
 from settings import *
-from utils import draw_rounded_rect_with_shadow, calculate_overlap_area, wrap_text, preprocess_lyrics
+from utils import draw_rounded_rect_with_shadow, calculate_overlap_area, wrap_text, preprocess_lyrics, fade_to_black
 from note import Note
+
+def play_song_preview(song_key):
+    # Retrieve the song path from the songs dictionary using the song key
+    song_path = songs[song_key][0]  # Assuming the first index holds the path to the mp3 file
+    
+    # Stop any currently playing music
+    pygame.mixer.music.stop()
+    
+    # Load the new song
+    try:
+        pygame.mixer.music.load(song_path)
+        # Play the loaded song
+        pygame.mixer.music.play()
+    except pygame.error as e:
+        print(f"Error loading song {song_key} from path {song_path}: {e}")
 
 def song_select_screen(screen, font):
     running = True
     song_keys = list(songs.keys())
     selected_index = 0
+    pygame.mixer.init()  # Make sure the mixer is initialized
+
+    # Load initial background image
+    background_image_path = songs[song_keys[selected_index]][1]
+    background_image = pygame.image.load(background_image_path)
+    background_image = pygame.transform.scale(background_image, (screen.get_width(), screen.get_height()))  # Optional: Scale image to fit the screen
+
+    play_song_preview(song_keys[selected_index])  # Play preview of the initially selected song
+
     while running:
-        screen.fill((0, 0, 0))  # Fill screen with black
+        # Update and draw the background image
+        screen.blit(background_image, (0, 0))
+
         for i, key in enumerate(song_keys):
             if i == selected_index:
+                # If the selected song has changed, update the background image
+                background_image_path = songs[song_keys[selected_index]][1]
+                background_image = pygame.image.load(background_image_path)
+                background_image = pygame.transform.scale(background_image, (screen.get_width(), screen.get_height()))
+
                 text_surf = font.render(f"> {key}", True, HIGHLIGHT_COLOR)  # Highlight selected song
+                highlight_rect = text_surf.get_rect(x=100, y=98 + i * 40)
+                pygame.draw.rect(screen, BACKGROUND_HIGHLIGHT_COLOR, highlight_rect.inflate(20, 10), 0, 5)
             else:
-                text_surf = font.render(key, True, (255, 255, 255))  # Other songs
+                text_surf = font.render(key, True, (255, 255, 255))
+
             screen.blit(text_surf, (100, 100 + i * 40))
 
         pygame.display.flip()
@@ -27,9 +61,21 @@ def song_select_screen(screen, font):
             elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
                     selected_index = max(0, selected_index - 1)
+                    play_song_preview(song_keys[selected_index])  # Corrected
+                    # Load and draw new background image for selected song
+                    background_image_path = songs[song_keys[selected_index]][1]
+                    background_image = pygame.image.load(background_image_path)
+                    background_image = pygame.transform.scale(background_image, (screen.get_width(), screen.get_height()))
                 elif event.key == pygame.K_DOWN:
                     selected_index = min(len(song_keys) - 1, selected_index + 1)
+                    play_song_preview(song_keys[selected_index])  # Corrected
+                    # Load and draw new background image for selected song
+                    background_image_path = songs[song_keys[selected_index]][1]
+                    background_image = pygame.image.load(background_image_path)
+                    background_image = pygame.transform.scale(background_image, (screen.get_width(), screen.get_height()))
                 elif event.key == pygame.K_RETURN:
+                    pygame.mixer.music.stop()  # Stop the preview when a song is selected
+                    fade_to_black(screen, 10)
                     return song_keys[selected_index]
 
 class Game:
@@ -74,8 +120,12 @@ class Game:
         self.game_over = False
         self.animation_played = False
         self.result_effects = False
-        pygame.mixer.music.play(0) 
         self.generate_notes()
+        pygame.mixer.music.play(0) 
+        self.fade_from_black(fade_speed=10)
+
+
+        
 
     def generate_notes(self):
         start_x = (SCREEN_WIDTH - (4 * RECTANGLE_WIDTH + (4 - 1) * RECTANGLE_GAP)) // 2
@@ -497,7 +547,22 @@ class Game:
             pygame.display.flip()
             pygame.time.delay(50)  # Adjust the delay for the desired speed of the fade effect
 
-                
+    def fade_from_black(self, fade_speed=5):
+        fade_surface = pygame.Surface((self.screen.get_width(), self.screen.get_height()))
+        fade_surface.fill((0, 0, 0))
+        for alpha in reversed(range(0, 256, fade_speed)):
+            fade_surface.set_alpha(alpha)
+            overlay = pygame.Surface((self.screen.get_width(), self.screen.get_height()), pygame.SRCALPHA)
+            overlay.fill((0, 0, 0, 180))
+            self.screen.blit(self.background_image, (0, 0))  # Ensure background is redrawn
+            self.screen.blit(overlay, (0, 0))
+            self.draw_rectangles()
+            self.draw_progress_bar()
+            self.screen.blit(fade_surface, (0, 0))
+            pygame.display.update()
+            pygame.time.delay(50)
+
+
     def main_loop(self):
         running = True
         while running:
@@ -513,7 +578,12 @@ class Game:
                         selected_song = song_select_screen(self.screen, self.font)  # Show song selection screen
                         self.__init__(selected_song, self.screen, self.font)  # Reinitialize the game with new song choice
                         return  # Exit the current game loop to start over with the new song
-
+                    elif event.key == pygame.K_ESCAPE:
+                        pygame.mixer.music.stop()  # Stop any playing music
+                        selected_song = song_select_screen(self.screen, self.font)  # Show song selection screen
+                        self.__init__(selected_song, self.screen, self.font)  # Reinitialize the game with new song choice
+                        return  # Exit the current game loop to start over with the new song
+                    
             if not pygame.mixer.music.get_busy() and not self.game_over:
                 self.fade_to_black()
                 self.game_over = True

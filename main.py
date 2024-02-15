@@ -7,7 +7,8 @@ if __name__ == "__main__":
     pygame.init()
     pygame.mixer.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("Rhythm Game")
+    pygame.mixer.music.set_volume(0.7)
+    pygame.display.set_caption("Nolai: A Rhythm Game")
     clock = pygame.time.Clock()
     font = pygame.font.Font(None, 36)  # Default font for simplicity
 

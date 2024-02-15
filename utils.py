@@ -112,7 +112,23 @@ def threshold_calculator(file_path):
     # f is fail
     threshold['f'] = 0
 
-    print(threshold)
     return threshold
 
-threshold_calculator("assets/allergy/allergy.txt")
+def fade_to_black(screen, fade_speed=5):
+    fade_surface = pygame.Surface((screen.get_width(), screen.get_height()))
+    fade_surface.fill((0, 0, 0))
+    for alpha in range(0, 256, fade_speed):  # Increment by fade_speed
+        fade_surface.set_alpha(alpha)
+        screen.blit(fade_surface, (0, 0))
+        pygame.display.flip()
+        pygame.time.delay(50)  # Adjust the delay for the desired speed of the fade effect
+
+def fade_from_black(screen, fade_speed=5):
+    fade_surface = pygame.Surface((screen.get_width(), screen.get_height()))
+    fade_surface.fill((0, 0, 0))
+    for alpha in range(255, -1, -fade_speed):  # Decrement by fade_speed
+        fade_surface.set_alpha(alpha)
+        screen.blit(fade_surface, (0, 0))
+        pygame.display.flip()
+        pygame.time.delay(50)  # Adjust the delay for the desired speed of the fade effect
+
