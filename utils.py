@@ -89,8 +89,6 @@ def threshold_calculator(file_path):
         for line in file:
             line_count += 1
             perfect_score += min(100 + (line_count * 10) // 2, 350)
-            good_score += min(50 + (line_count * 10) // 2, 350)
-            okay_score += min(10 + (line_count * 10) // 2, 350)
 
     # calculate the max score possible (all perfect streak)
             
@@ -131,4 +129,3 @@ def fade_from_black(screen, fade_speed=5):
         screen.blit(fade_surface, (0, 0))
         pygame.display.flip()
         pygame.time.delay(50)  # Adjust the delay for the desired speed of the fade effect
-

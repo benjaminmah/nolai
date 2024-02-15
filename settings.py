@@ -74,8 +74,8 @@ allergy_lyrics = [
 # SONGS dictionary with paths and grade thresholds
 songs = {
     "allergy": ["assets/allergy/allergy.mp3", "assets/allergy/gidle.jpg", "assets/allergy/allergy.txt", threshold_calculator("assets/allergy/allergy.txt"), allergy_lyrics, KOREAN_FONT],
-    "ima": ["assets/ima/ima.mp3", "assets/ima/ima.jpg", "assets/ima/ima.txt", {'s': 140000, 'a': 120000, 'b': 90000, 'c': 50000, 'd': 10000, 'f': 0}, ima_lyrics, JAPANESE_FONT],
-    "afterlike": ["assets/afterlike/afterlike.mp3", "assets/afterlike/afterlike.jpg", "assets/afterlike/afterlike.txt", {'s': 140000, 'a': 120000, 'b': 90000, 'c': 50000, 'd': 10000, 'f': 0}, ima_lyrics, KOREAN_FONT],
-    "girlscapitalism": ["assets/girlscapitalism/girlscapitalism.mp3", "assets/girlscapitalism/girlscapitalism.png", "assets/girlscapitalism/girlscapitalism.txt", {'s': 140000, 'a': 120000, 'b': 90000, 'c': 50000, 'd': 10000, 'f': 0}, [(0, "")], KOREAN_FONT]
+    "ima": ["assets/ima/ima.mp3", "assets/ima/ima.jpg", "assets/ima/ima.txt", threshold_calculator("assets/ima/ima.txt"), ima_lyrics, JAPANESE_FONT],
+    "afterlike": ["assets/afterlike/afterlike.mp3", "assets/afterlike/afterlike.jpg", "assets/afterlike/afterlike.txt", threshold_calculator("assets/afterlike/afterlike.txt"), ima_lyrics, KOREAN_FONT],
+    "girlscapitalism": ["assets/girlscapitalism/girlscapitalism.mp3", "assets/girlscapitalism/girlscapitalism.png", "assets/girlscapitalism/girlscapitalism.txt", threshold_calculator("assets/girlscapitalism/girlscapitalism.txt"), [(0, "")], KOREAN_FONT]
     }
 

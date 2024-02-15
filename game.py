@@ -186,11 +186,11 @@ class Game:
             self.perfect_hits += 1
         elif overlap_area > 150:
             self.hit_status = "good!"
-            self.score += min(50 + (self.streak_counter * 10) // 2, 300)
+            self.score += min(60 + (self.streak_counter * 10) // 2, 300)
             self.good_hits += 1
         else:
             self.hit_status = "okay!"
-            self.score += min(10 + (self.streak_counter * 10) // 2, 360)
+            self.score += min(30 + (self.streak_counter * 10) // 2, 360)
             self.okay_hits += 1
 
         self.streak_counter += 1
@@ -235,7 +235,10 @@ class Game:
             self.screen.blit(hit_text_surface, text_rect)
 
             font = pygame.font.Font(CUSTOM_FONT, 35)
-            streak_text = font.render(str(self.streak_counter), True, (255, 255, 255))
+            if self.streak_counter >= 0:
+                streak_text = font.render(f"{str(self.streak_counter)}", True, (255, 255, 255))
+            else:
+                streak_text = font.render(str(self.streak_counter), True, (255, 255, 255))   
             streak_text_surface = pygame.Surface(streak_text.get_size(), pygame.SRCALPHA)
             streak_text_surface.blit(streak_text, (0, 0))
             streak_text_surface.set_alpha(opacity)
