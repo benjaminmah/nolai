@@ -229,6 +229,7 @@ class Game:
         self.screen.blit(grade_surface, (x, y))
 
         if not result_effects:
+            pygame.time.delay(1000)
             pygame.mixer.Sound.play(self.letter_sound)
             pygame.display.flip()
         else:
@@ -408,9 +409,15 @@ class Game:
                 pygame.draw.line(self.screen, marker_color, (marker_position, progress_bar_y), (marker_position, progress_bar_y + progress_bar_height), 1)
             
             # Display the grade letter above the marker
-            grade_text = font.render(grade, True, marker_color)
-            self.screen.blit(grade_text, (marker_position - grade_text.get_width() / 2, progress_bar_y - grade_text.get_height() - 5))
-
+            if grade not in ["s", "f"]:
+                grade_text = font.render(grade, True, marker_color)
+                self.screen.blit(grade_text, (marker_position - grade_text.get_width() / 2, progress_bar_y - grade_text.get_height() - 5))
+            elif grade == "s":
+                grade_text = font.render(grade, True, marker_color)
+                self.screen.blit(grade_text, (marker_position - grade_text.get_width() / 2 + 12, progress_bar_y + 3))
+            else:
+                grade_text = font.render(grade, True, marker_color)
+                self.screen.blit(grade_text, (marker_position - grade_text.get_width() / 2 - 14, progress_bar_y + 3))
     def preprocess_lyrics(self, font, max_width, lyrics):
         self.processed_lyrics = []  # Store pre-processed lyrics as tuples of (start_time, [surfaces])
         for time_stamp, lyric in lyrics:

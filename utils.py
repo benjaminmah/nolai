@@ -74,3 +74,45 @@ def preprocess_lyrics(font, max_width, lyrics):
         lyric_surfaces = [font.render(line, True, (255, 255, 255)) for line in wrapped_text]
         processed_lyrics.append((time_stamp, lyric_surfaces))
     return processed_lyrics
+
+
+def threshold_calculator(file_path):
+    threshold = {}
+
+    perfect_score = 0
+    good_score = 0
+    okay_score = 0
+
+    # count the number of notes
+    with open(file_path, 'r') as file:
+        line_count = 0
+        for line in file:
+            line_count += 1
+            perfect_score += min(100 + (line_count * 10) // 2, 350)
+            good_score += min(50 + (line_count * 10) // 2, 350)
+            okay_score += min(10 + (line_count * 10) // 2, 350)
+
+    # calculate the max score possible (all perfect streak)
+            
+    # top 5% is s
+    threshold['s'] = perfect_score - perfect_score * 0.05
+
+    # top 10% is a
+    threshold['a'] = perfect_score - perfect_score * 0.10
+
+    # top 20% is b
+    threshold['b'] = perfect_score - perfect_score * 0.20
+
+    # top 35% is c
+    threshold['c'] = perfect_score - perfect_score * 0.35
+
+    # top 55% is d
+    threshold['d'] = perfect_score - perfect_score * 0.55
+
+    # f is fail
+    threshold['f'] = 0
+
+    print(threshold)
+    return threshold
+
+threshold_calculator("assets/allergy/allergy.txt")
