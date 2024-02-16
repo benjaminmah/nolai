@@ -28,21 +28,53 @@ def song_select_screen(screen, font):
 
     # Load initial background image
     background_image_path = songs[song_keys[selected_index]][1]
-    background_image = pygame.image.load(background_image_path)
-    background_image = pygame.transform.scale(background_image, (screen.get_width(), screen.get_height()))  # Optional: Scale image to fit the screen
+    background_image = pygame.image.load(background_image_path).convert()
+
+    # Calculate the aspect ratios
+    aspect_ratio_screen = SCREEN_WIDTH / SCREEN_HEIGHT
+    aspect_ratio_image = background_image.get_width() / background_image.get_height()
+
+    # Scale the image to fill the screen
+    if aspect_ratio_screen > aspect_ratio_image:
+        # Screen is wider than the image
+        scale_factor = SCREEN_WIDTH / background_image.get_width()
+    else:
+        # Screen is taller than the image
+        scale_factor = SCREEN_HEIGHT / background_image.get_height()
+
+    background_image = pygame.transform.scale(background_image, (int(background_image.get_width() * scale_factor), int(background_image.get_height() * scale_factor)))
+
+    # Center the image
+    background_rect = background_image.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
 
     play_song_preview(song_keys[selected_index])  # Play preview of the initially selected song
 
     while running:
         # Update and draw the background image
-        screen.blit(background_image, (0, 0))
+        screen.blit(background_image, background_rect)
 
         for i, key in enumerate(song_keys):
             if i == selected_index:
-                # If the selected song has changed, update the background image
+                # Load initial background image
                 background_image_path = songs[song_keys[selected_index]][1]
-                background_image = pygame.image.load(background_image_path)
-                background_image = pygame.transform.scale(background_image, (screen.get_width(), screen.get_height()))
+                background_image = pygame.image.load(background_image_path).convert()
+
+                # Calculate the aspect ratios
+                aspect_ratio_screen = SCREEN_WIDTH / SCREEN_HEIGHT
+                aspect_ratio_image = background_image.get_width() / background_image.get_height()
+
+                # Scale the image to fill the screen
+                if aspect_ratio_screen > aspect_ratio_image:
+                    # Screen is wider than the image
+                    scale_factor = SCREEN_WIDTH / background_image.get_width()
+                else:
+                    # Screen is taller than the image
+                    scale_factor = SCREEN_HEIGHT / background_image.get_height()
+
+                background_image = pygame.transform.scale(background_image, (int(background_image.get_width() * scale_factor), int(background_image.get_height() * scale_factor)))
+
+                # Center the image
+                background_rect = background_image.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
 
                 text_surf = font.render(f"> {key}", True, HIGHLIGHT_COLOR)  # Highlight selected song
                 highlight_rect = text_surf.get_rect(x=100, y=98 + i * 40)
@@ -62,17 +94,50 @@ def song_select_screen(screen, font):
                 if event.key == pygame.K_UP:
                     selected_index = max(0, selected_index - 1)
                     play_song_preview(song_keys[selected_index])  # Corrected
-                    # Load and draw new background image for selected song
+                    # Load initial background image
                     background_image_path = songs[song_keys[selected_index]][1]
-                    background_image = pygame.image.load(background_image_path)
-                    background_image = pygame.transform.scale(background_image, (screen.get_width(), screen.get_height()))
+                    background_image = pygame.image.load(background_image_path).convert()
+
+                    # Calculate the aspect ratios
+                    aspect_ratio_screen = SCREEN_WIDTH / SCREEN_HEIGHT
+                    aspect_ratio_image = background_image.get_width() / background_image.get_height()
+
+                    # Scale the image to fill the screen
+                    if aspect_ratio_screen > aspect_ratio_image:
+                        # Screen is wider than the image
+                        scale_factor = SCREEN_WIDTH / background_image.get_width()
+                    else:
+                        # Screen is taller than the image
+                        scale_factor = SCREEN_HEIGHT / background_image.get_height()
+
+                    background_image = pygame.transform.scale(background_image, (int(background_image.get_width() * scale_factor), int(background_image.get_height() * scale_factor)))
+
+                    # Center the image
+                    background_rect = background_image.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
                 elif event.key == pygame.K_DOWN:
                     selected_index = min(len(song_keys) - 1, selected_index + 1)
                     play_song_preview(song_keys[selected_index])  # Corrected
                     # Load and draw new background image for selected song
+                    # Load initial background image
                     background_image_path = songs[song_keys[selected_index]][1]
-                    background_image = pygame.image.load(background_image_path)
-                    background_image = pygame.transform.scale(background_image, (screen.get_width(), screen.get_height()))
+                    background_image = pygame.image.load(background_image_path).convert()
+
+                    # Calculate the aspect ratios
+                    aspect_ratio_screen = SCREEN_WIDTH / SCREEN_HEIGHT
+                    aspect_ratio_image = background_image.get_width() / background_image.get_height()
+
+                    # Scale the image to fill the screen
+                    if aspect_ratio_screen > aspect_ratio_image:
+                        # Screen is wider than the image
+                        scale_factor = SCREEN_WIDTH / background_image.get_width()
+                    else:
+                        # Screen is taller than the image
+                        scale_factor = SCREEN_HEIGHT / background_image.get_height()
+
+                    background_image = pygame.transform.scale(background_image, (int(background_image.get_width() * scale_factor), int(background_image.get_height() * scale_factor)))
+
+                    # Center the image
+                    background_rect = background_image.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
                 elif event.key == pygame.K_RETURN:
                     pygame.mixer.music.stop()  # Stop the preview when a song is selected
                     fade_to_black(screen, 10)
@@ -94,8 +159,26 @@ class Game:
         self.main_loop()
 
     def load_assets(self):
-        self.background_image = pygame.image.load(self.image).convert()
-        self.background_image = pygame.transform.scale(self.background_image, (SCREEN_WIDTH, SCREEN_HEIGHT))
+        # Load the background image
+        background_image = pygame.image.load(self.image).convert()
+
+        # Calculate the aspect ratios
+        aspect_ratio_screen = SCREEN_WIDTH / SCREEN_HEIGHT
+        aspect_ratio_image = background_image.get_width() / background_image.get_height()
+
+        # Scale the image to fill the screen
+        if aspect_ratio_screen > aspect_ratio_image:
+            # Screen is wider than the image
+            scale_factor = SCREEN_WIDTH / background_image.get_width()
+        else:
+            # Screen is taller than the image
+            scale_factor = SCREEN_HEIGHT / background_image.get_height()
+
+        self.background_image = pygame.transform.scale(background_image, (int(background_image.get_width() * scale_factor), int(background_image.get_height() * scale_factor)))
+
+        # Center the image
+        self.background_rect = self.background_image.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2))
+
         pygame.mixer.music.load(self.track)
         pygame.mixer.music.set_volume(1.0)
         with open(self.song_notes, 'r') as f:
@@ -557,7 +640,7 @@ class Game:
             fade_surface.set_alpha(alpha)
             overlay = pygame.Surface((self.screen.get_width(), self.screen.get_height()), pygame.SRCALPHA)
             overlay.fill((0, 0, 0, 180))
-            self.screen.blit(self.background_image, (0, 0))  # Ensure background is redrawn
+            self.screen.blit(self.background_image, self.background_rect)  # Ensure background is redrawn
             self.screen.blit(overlay, (0, 0))
             self.draw_rectangles()
             self.draw_progress_bar()
@@ -593,7 +676,7 @@ class Game:
 
 
             if not self.game_over:
-                self.screen.blit(self.background_image, (0, 0))
+                self.screen.blit(self.background_image, self.background_rect)
                 black_overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.SRCALPHA)
                 black_overlay.fill((0, 0, 0, 180))
                 self.screen.blit(black_overlay, (0, 0))
