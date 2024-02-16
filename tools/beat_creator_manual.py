@@ -8,12 +8,12 @@ def create_beat_times():
     pygame.mixer.init()
 
     # Load the MP3 file
-    pygame.mixer.music.load('assets/girlscapitalism.mp3')
+    pygame.mixer.music.load('assets/fate/fate.mp3')
     pygame.mixer.music.set_volume(0.5)  # Adjust volume as needed
     pygame.mixer.music.play()
 
     # Open the file in append mode to add new beat times
-    with open('assets/girlscapitalism.txt', 'a') as f:
+    with open('assets/fate/fate.txt', 'a') as f:
         print("Press SPACE to add beat time. Press Q to quit.")
         
         # Start time
